@@ -35,8 +35,10 @@ def _get_filtered_runs(krr_cfg, ds, entity_name):
         return []
 
     project_name = krr_cfg["proj_name"] + ds
+    print("Fetching runs from project:", project_name)
     runs = get_project_runs(entity_name, project_name)
     runs = filter_runs_union(runs, krr_cfg["criteria_list"])
+    print(f"Number of runs after filtering: {len(runs)}")
     return runs
 
 

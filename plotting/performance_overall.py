@@ -19,10 +19,10 @@ from base_utils import (
 from cfg_utils import create_krr_config, _get_filtered_runs, get_save_dir
 
 # save directory
-SAVE_DIR = "performance_comparison"
+SAVE_DIR = "performance_comparison_v2"
 
 # tolerances for the performance comparison
-CLASSIFICATION_EPS = 1e-3
+CLASSIFICATION_EPS = 1e-2  # 1e-3
 REGRESSION_REL_EPS = 1e-2
 
 # scaled time budget for the performance comparison
@@ -183,6 +183,7 @@ def get_best_stopping_points_all(dataset_cfgs, krr_configs):
     # Get the point where we reach the best metric value w.r.t. the stopping criterion
     best_stopping_points_all = {}
     for ds, runs in krr_runs.items():
+        print(f"Processing dataset: {ds}")
         best_metric_vals_ds = get_best_metric_val(runs)
         best_stopping_points_all[ds] = get_best_stopping_points(
             runs, best_metric_vals_ds
@@ -226,19 +227,20 @@ def get_scaled_performance_precision(
     best_stopping_points_classification = get_best_stopping_points_all(
         datasets_classification_cfg, krr_configs
     )
-    best_stopping_points_regression = get_best_stopping_points_all(
-        datasets_regression_cfg, krr_configs
-    )
+    # best_stopping_points_regression = get_best_stopping_points_all(
+    #     datasets_regression_cfg, krr_configs
+    # )
 
     # Convert the stopping points to performance
     performance_classification = get_scaled_performance(
         best_stopping_points_classification, time_budget
     )
-    performance_regression = get_scaled_performance(
-        best_stopping_points_regression, time_budget
-    )
+    # performance_regression = get_scaled_performance(
+    #     best_stopping_points_regression, time_budget
+    # )
 
-    return performance_classification, performance_regression
+    # return performance_classification, performance_regression
+    return performance_classification
 
 
 if __name__ == "__main__":
@@ -253,29 +255,41 @@ if __name__ == "__main__":
         time_budget=TIME_BUDGET,
     )
 
+    # plot_fn = partial(
+    #     plot_performance_grid,
+    #     x_vals=TIME_BUDGET,
+    #     titles=["Classification", "Regression"],
+    #     n_cols=2,
+    #     n_rows=1,
+    #     save_dir=get_save_dir(BASE_SAVE_DIR, SAVE_DIR),
+    # )
+
     plot_fn = partial(
         plot_performance_grid,
         x_vals=TIME_BUDGET,
-        titles=["Classification", "Regression"],
-        n_cols=2,
+        titles=["Classification"],
+        n_cols=1,
         n_rows=1,
         save_dir=get_save_dir(BASE_SAVE_DIR, SAVE_DIR),
     )
 
     with tqdm(total=2, desc="Performance overall") as pbar:
-        perf_classification_float32, perf_regression_float32 = performance_fn(
-            filters=FILTERS_FLOAT32
-        )
+        # perf_classification_float32, perf_regression_float32 = performance_fn(
+        #     filters=FILTERS_FLOAT32
+        # )
+        perf_classification_float32 = performance_fn(filters=FILTERS_FLOAT32)
         plot_fn(
-            performance_dicts=[perf_classification_float32, perf_regression_float32],
+            # performance_dicts=[perf_classification_float32, perf_regression_float32],
+            performance_dicts=[perf_classification_float32],
             save_name=f"float32_overall.{EXTENSION}",
         )
         pbar.update(1)
-        perf_classification_float64, perf_regression_float64 = performance_fn(
-            filters=FILTERS_FLOAT64
-        )
+        # perf_classification_float64, perf_regression_float64 = performance_fn(
+        #     filters=FILTERS_FLOAT64
+        # )
+        perf_classification_float64 = performance_fn(filters=FILTERS_FLOAT64)
         plot_fn(
-            performance_dicts=[perf_classification_float64, perf_regression_float64],
+            performance_dicts=[perf_classification_float64],
             save_name=f"float64_overall.{EXTENSION}",
         )
         pbar.update(1)

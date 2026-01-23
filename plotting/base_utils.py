@@ -177,9 +177,10 @@ def get_label(run, hparams_to_label):
     opt = _get_opt(run)
     hparam_labels = [OPT_LABELS[opt]]
     for hparam in hparams_to_label:
-        hparam_label = LABEL_FNS[hparam](run)
-        if hparam_label is not None:
-            hparam_labels.append(hparam_label)
+        if hparam in ["r", "m"]:
+            hparam_label = LABEL_FNS[hparam](run)
+            if hparam_label is not None:
+                hparam_labels.append(hparam_label)
     return ", ".join(hparam_labels)
 
 

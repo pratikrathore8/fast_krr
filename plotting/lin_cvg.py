@@ -18,7 +18,7 @@ from cfg_utils import get_save_dir, create_krr_config, plot_runs_dataset_grid
 X_AXIS = "datapasses"
 
 # save directory
-SAVE_DIR = "lin_cvg"
+SAVE_DIR = "lin_cvg_v2"
 
 # filters for runs
 ASKOTCH_FILTER = {

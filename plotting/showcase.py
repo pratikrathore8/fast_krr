@@ -20,7 +20,7 @@ PROJECT_FULL_KRR = "performance_full_krr_"
 PROJECT_INDUCING_KRR = "performance_inducing_krr_"
 
 # save directory
-SAVE_DIR = "showcase"
+SAVE_DIR = "showcase_v2"
 
 # filters for runs
 ASKOTCH_FILTER = {
