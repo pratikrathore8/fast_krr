@@ -135,9 +135,9 @@ Configurations for running `ASkotch` and PCG on the taxi dataset.
 - `taxi_ep3`: Configurations for running EigenPro3 on the taxi dataset.
 - `lin_cvg_full_krr`: Configurations for running linear convergence experiments with `ASkotch`.
 
-#### Sections 6.1 and 6.4
+#### Sections 7.1 and 7.4
 
-To run the experiments in Sections 6.1 and 6.4, we will use the folders `performance_full_krr`, `performance_full_krr_ep2`, `performance_inducing_krr_ep3`, and `performance_inducing_krr`.
+To run the experiments in Sections 7.1 and 7.4, we will use the folders `performance_full_krr`, `performance_full_krr_ep2`, `performance_inducing_krr_ep3`, and `performance_inducing_krr`.
 
 To run each set of experiments, run `run_experiments.py` with the appropriate configuration folder as one of the arguments. For example:
 
@@ -149,13 +149,13 @@ The argument `--devices` specifies the GPU devices to use, and `--grace-period-f
 Specifying multiple GPUs will run multiple experiments at the same time.
 For example, `--devices 0 1` will run two experiments at the same time, one on GPU 0 and the other on GPU 1.
 
-#### Section 6.2
+#### Section 7.2
 
-To run the experiments in Section 6.2, we will use the folders `taxi_full_krr`, `taxi_falkon`, `taxi_ep2`, and `taxi_ep3`.
+To run the experiments in Section 7.2, we will use the folders `taxi_full_krr`, `taxi_falkon`, `taxi_ep2`, and `taxi_ep3`.
 Similar to above, we just have to run `run_experiments.py` with the appropriate arguments.
 
-#### Section 6.3
-To run the experiments in Section 6.3, we will use the folder `lin_cvg_full_krr`.
+#### Section 7.3
+To run the experiments in Section 7.3, we will use the folder `lin_cvg_full_krr`.
 Similar to above, we just have to run `run_experiments.py` with the appropriate arguments.
 
 ### Generating the figures
