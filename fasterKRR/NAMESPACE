@@ -1,0 +1,34 @@
+# Public API
+export(CreateFullKRR)
+export(CreateInducingKRR)
+export(UpdateModel)
+
+# CVST imports for lambda auto-selection
+importFrom(CVST, constructData, constructLearner, constructCVSTModel,
+           fastCV, CV)
+
+# stats imports
+importFrom(stats, predict)
+
+# Public S3 methods
+S3method(predict, FullKRR)
+S3method(predict, InducingKRR)
+S3method(UpdateModel, InducingKRR)
+S3method(UpdateModel, FullKRR)
+
+# Internal S3 method registrations (needed for dispatch, not exported)
+S3method(Step, EigenPro2)
+S3method(Step, EigenPro3)
+S3method(Step, EigenPro4)
+S3method(Step, ASkotch)
+S3method(Step, ASkotchV2)
+S3method(Step, PCG)
+S3method(Step, Mimosa)
+S3method(LinOp, FullKRR)
+S3method(LinOp, InducingKRR)
+S3method(ComputeMetrics, FullKRR)
+S3method(ComputeMetrics, InducingKRR)
+S3method(InvLinOp, NewtonPrecond)
+S3method(InvLinOp, NystromPrecond)
+S3method(InvLinOp, FalkonPrecond)
+S3method(InvLinOp, PartialCholeskyPrecond)

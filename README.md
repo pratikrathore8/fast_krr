@@ -23,6 +23,10 @@ You can `pip` install the package using the following command:
 pip install git+https://github.com/pratikrathore8/fast_krr.git
 ```
 
+### R package
+
+An R translation of this package is also available in the [`fasterKRR`](fasterKRR/) directory. See [fasterKRR-readme.md](fasterKRR-readme.md) for installation and usage instructions.
+
 ### Example usage
 
 ```python

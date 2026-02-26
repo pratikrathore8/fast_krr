@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Getting Started with fasterKRR</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started with fasterKRR</h1>
+
+
+
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p><strong>fasterKRR</strong> provides fast solvers for kernel ridge
+regression (KRR). It is an R translation of the <a href="https://github.com/pratikrathore8/fast_krr">fast_krr</a> Python
+package.</p>
+<p>The package exports two main functions and their predict methods:</p>
+<ul>
+<li><code>CreateFullKRR()</code> – fit a full kernel ridge regression
+model</li>
+<li><code>CreateInducingKRR()</code> – fit an inducing-point
+(Nystrom-approximate) KRR model</li>
+<li><code>predict()</code> – generate predictions from a fitted
+model</li>
+</ul>
+<p>All kernel computation, optimizer construction, iteration stepping,
+and metric evaluation happen internally. You specify the kernel type,
+optimizer, and any additional options as arguments to
+<code>CreateFullKRR()</code> or <code>CreateInducingKRR()</code>, and
+receive a fitted model object ready for prediction.</p>
+<p>Key features:</p>
+<ul>
+<li><strong>Kernel types</strong>: RBF, Matern, L1 Laplace</li>
+<li><strong>Optimizers</strong>: PCG, EigenPro2, ASkotch</li>
+<li><strong>Preconditioners</strong> (for PCG): Newton, Nystrom, Partial
+Cholesky</li>
+<li><strong>Tasks</strong>: regression and classification</li>
+</ul>
+</div>
+<div id="regression-with-pcg" class="section level2">
+<h2>Regression with PCG</h2>
+<p>The simplest workflow creates a model with the PCG solver, then uses
+<code>predict()</code> to generate predictions.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(fasterKRR)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co"># Generate synthetic data: y = sin(x1) + noise</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>x_train <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n <span class="sc">*</span> d), n, d)</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> <span class="fu">sin</span>(x_train[, <span class="dv">1</span>]) <span class="sc">+</span> <span class="fl">0.1</span> <span class="sc">*</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>x_test <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">30</span> <span class="sc">*</span> d), <span class="dv">30</span>, d)</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>y_test <span class="ot">&lt;-</span> <span class="fu">sin</span>(x_test[, <span class="dv">1</span>]) <span class="sc">+</span> <span class="fl">0.1</span> <span class="sc">*</span> <span class="fu">rnorm</span>(<span class="dv">30</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co"># Fit with unpreconditioned PCG (30 iterations)</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">CreateFullKRR</span>(</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>  <span class="at">x        =</span> x_train,</span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a>  <span class="at">y        =</span> y_train,</span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>  <span class="at">kernel   =</span> <span class="st">&quot;rbf&quot;</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>  <span class="at">sigma    =</span> <span class="fl">1.0</span>,</span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a>  <span class="at">lambda   =</span> <span class="fl">0.01</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a>  <span class="at">optimizer =</span> <span class="st">&quot;pcg&quot;</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a>  <span class="at">iters    =</span> <span class="dv">30</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a>  <span class="at">verbose  =</span> <span class="cn">TRUE</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a>)</span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  3/30  rel_residual=0.207677</span></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  6/30  rel_residual=0.100063</span></span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  9/30  rel_residual=0.064266</span></span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 12/30  rel_residual=0.037558</span></span>
+<span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 15/30  rel_residual=0.014244</span></span>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 18/30  rel_residual=0.005348</span></span>
+<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 21/30  rel_residual=0.003962</span></span>
+<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 24/30  rel_residual=0.002349</span></span>
+<span id="cb1-33"><a href="#cb1-33" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 27/30  rel_residual=0.001111</span></span>
+<span id="cb1-34"><a href="#cb1-34" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 30/30  rel_residual=0.000995</span></span>
+<span id="cb1-35"><a href="#cb1-35" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" tabindex="-1"></a><span class="co"># Inspect convergence metrics stored on the fitted object</span></span>
+<span id="cb1-37"><a href="#cb1-37" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Relative residual:&quot;</span>, <span class="fu">round</span>(fit<span class="sc">$</span>metrics<span class="sc">$</span>rel_residual, <span class="dv">6</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb1-38"><a href="#cb1-38" tabindex="-1"></a><span class="co">#&gt; Relative residual: 0.000995</span></span></code></pre></div>
+<p>The <code>verbose = TRUE</code> argument prints progress at each
+iteration. Metrics such as <code>rel_residual</code> and
+<code>train_loss</code> are available in the <code>fit$metrics</code>
+list after fitting. Use <code>predict()</code> to evaluate held-out
+performance.</p>
+</div>
+<div id="making-predictions" class="section level2">
+<h2>Making predictions</h2>
+<p>Use the standard R <code>predict()</code> generic on any fitted
+model.</p>
+<div id="predicting-on-the-test-set" class="section level3">
+<h3>Predicting on the test set</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>y_pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, x_test)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;First 5 predictions:&quot;</span>, <span class="fu">round</span>(y_pred[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; First 5 predictions: 0.8426 -0.0761 0.209 -0.5489 0.1856</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;First 5 actual:     &quot;</span>, <span class="fu">round</span>(y_test[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; First 5 actual:      1.033 -0.0383 0.0178 -0.9771 0.692</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Correlation:        &quot;</span>, <span class="fu">round</span>(<span class="fu">cor</span>(y_pred, y_test), <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; Correlation:         0.9478</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Test RMSE:          &quot;</span>, <span class="fu">round</span>(<span class="fu">sqrt</span>(<span class="fu">mean</span>((y_pred <span class="sc">-</span> y_test)<span class="sc">^</span><span class="dv">2</span>)), <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; Test RMSE:           0.278</span></span></code></pre></div>
+</div>
+<div id="predicting-on-completely-new-data" class="section level3">
+<h3>Predicting on completely new data</h3>
+<p><code>predict()</code> works on any matrix with the same number of
+columns as the training data – the kernel between new points and the
+training set is computed internally.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>x_new <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="dv">10</span> <span class="sc">*</span> d), <span class="dv">10</span>, d)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>y_new <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, x_new)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Predictions for 10 new points:&quot;</span>, <span class="fu">round</span>(y_new, <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; Predictions for 10 new points: 0.2319 0.6047 -0.1529 -0.9626 -1.034 -0.5787 0.563 -0.4455 -0.6525 -0.3621</span></span></code></pre></div>
+</div>
+<div id="predictions-with-inducing-point-models" class="section level3">
+<h3>Predictions with inducing-point models</h3>
+<p><code>CreateInducingKRR()</code> fits a model using only a subset of
+the training points (the “inducing points”). The <code>predict()</code>
+method computes the kernel between new points and the inducing set, so
+usage is identical.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>m_ind <span class="ot">&lt;-</span> <span class="dv">15</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>fit_ind <span class="ot">&lt;-</span> <span class="fu">CreateInducingKRR</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  <span class="at">x            =</span> x_train,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="at">y            =</span> y_train,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="at">inducing_pts =</span> <span class="dv">1</span><span class="sc">:</span>m_ind,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>  <span class="at">kernel       =</span> <span class="st">&quot;rbf&quot;</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>  <span class="at">sigma        =</span> <span class="fl">1.0</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="at">lambda       =</span> <span class="fl">0.01</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  <span class="at">optimizer    =</span> <span class="st">&quot;pcg&quot;</span>,</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="at">iters        =</span> <span class="dv">30</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>)</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a>y_pred_ind <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_ind, x_test)</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Inducing KRR predictions (first 5):&quot;</span>, <span class="fu">round</span>(y_pred_ind[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>], <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; Inducing KRR predictions (first 5): 0.5418 -0.13 -0.2265 -0.2106 0.0859</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Correlation with truth:            &quot;</span>, <span class="fu">round</span>(<span class="fu">cor</span>(y_pred_ind, y_test), <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; Correlation with truth:             0.821</span></span></code></pre></div>
+</div>
+</div>
+<div id="adding-preconditioners" class="section level2">
+<h2>Adding preconditioners</h2>
+<p>Preconditioners dramatically accelerate PCG convergence. Pass a
+<code>preconditioner</code> list to <code>CreateFullKRR()</code> when
+<code>optimizer = &quot;pcg&quot;</code>.</p>
+<div id="newton-preconditioner" class="section level3">
+<h3>Newton preconditioner</h3>
+<p>The Newton preconditioner factorizes the full regularized kernel
+matrix. It is exact for small problems and converges in very few
+iterations.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>fit_newton <span class="ot">&lt;-</span> <span class="fu">CreateFullKRR</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="at">x        =</span> x_train,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="at">y        =</span> y_train,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="at">kernel   =</span> <span class="st">&quot;rbf&quot;</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="at">sigma    =</span> <span class="fl">1.0</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  <span class="at">lambda   =</span> <span class="fl">0.01</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>  <span class="at">optimizer =</span> <span class="st">&quot;pcg&quot;</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="at">preconditioner =</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;newton&quot;</span>, <span class="at">rho =</span> <span class="st">&quot;regularization&quot;</span>),</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="at">iters    =</span> <span class="dv">5</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="at">verbose  =</span> <span class="cn">TRUE</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>)</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 1/5  rel_residual=0.000000</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 2/5  rel_residual=0.000000</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 3/5  rel_residual=0.000000</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 4/5  rel_residual=0.000000</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 5/5  rel_residual=0.000000</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Newton PCG (5 iters) - rel_residual:&quot;</span>,</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>    <span class="fu">round</span>(fit_newton<span class="sc">$</span>metrics<span class="sc">$</span>rel_residual, <span class="dv">8</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; Newton PCG (5 iters) - rel_residual: 0</span></span></code></pre></div>
+</div>
+<div id="nystrom-preconditioner" class="section level3">
+<h3>Nystrom preconditioner</h3>
+<p>The Nystrom preconditioner uses a low-rank approximation to the
+kernel matrix. It scales better than Newton to larger datasets while
+still providing significant speedup.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>fit_nystrom <span class="ot">&lt;-</span> <span class="fu">CreateFullKRR</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="at">x        =</span> x_train,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  <span class="at">y        =</span> y_train,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">kernel   =</span> <span class="st">&quot;rbf&quot;</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">sigma    =</span> <span class="fl">1.0</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">lambda   =</span> <span class="fl">0.01</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="at">optimizer =</span> <span class="st">&quot;pcg&quot;</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="at">preconditioner =</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;nystrom&quot;</span>, <span class="at">r =</span> <span class="dv">20</span>, <span class="at">rho =</span> <span class="st">&quot;regularization&quot;</span>),</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="at">iters    =</span> <span class="dv">10</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  <span class="at">verbose  =</span> <span class="cn">TRUE</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>)</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  1/10  rel_residual=0.774508</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  2/10  rel_residual=0.727642</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  3/10  rel_residual=0.699356</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  4/10  rel_residual=0.640611</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  5/10  rel_residual=0.634541</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  6/10  rel_residual=0.569640</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  7/10  rel_residual=0.533863</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  8/10  rel_residual=0.465214</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  9/10  rel_residual=0.405300</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 10/10  rel_residual=0.351592</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">Nystrom PCG (10 iters) - rel_residual:&quot;</span>,</span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>    <span class="fu">round</span>(fit_nystrom<span class="sc">$</span>metrics<span class="sc">$</span>rel_residual, <span class="dv">6</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co">#&gt; Nystrom PCG (10 iters) - rel_residual: 0.351592</span></span></code></pre></div>
+</div>
+</div>
+<div id="eigenpro2-optimizer" class="section level2">
+<h2>EigenPro2 optimizer</h2>
+<p>EigenPro2 is a preconditioned stochastic gradient descent method. It
+processes data in mini-batches (<code>block_sz</code>) and uses the top
+<code>r</code> eigenvectors of the kernel sub-matrix for
+preconditioning. It is well-suited for problems where many iterations of
+a stochastic method are preferred over the exact linear algebra of PCG.
+Specify <code>optimizer = &quot;eigenpro2&quot;</code> and pass
+<code>block_sz</code> and <code>r</code>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>fit_ep2 <span class="ot">&lt;-</span> <span class="fu">CreateFullKRR</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="at">x        =</span> x_train,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">y        =</span> y_train,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">kernel   =</span> <span class="st">&quot;rbf&quot;</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">sigma    =</span> <span class="fl">1.0</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="at">lambda   =</span> <span class="fl">0.01</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  <span class="at">optimizer =</span> <span class="st">&quot;eigenpro2&quot;</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  <span class="at">iters    =</span> <span class="dv">200</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="at">block_sz =</span> <span class="dv">80</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>  <span class="at">r        =</span> <span class="dv">10</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>  <span class="at">verbose  =</span> <span class="cn">FALSE</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>)</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;EigenPro2 (200 iters) - rel_residual:&quot;</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>    <span class="fu">round</span>(fit_ep2<span class="sc">$</span>metrics<span class="sc">$</span>rel_residual, <span class="dv">6</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; EigenPro2 (200 iters) - rel_residual: 0.014647</span></span></code></pre></div>
+</div>
+<div id="askotch-optimizer" class="section level2">
+<h2>ASkotch optimizer</h2>
+<p>ASkotch is an accelerated block coordinate descent method. It
+partitions the data into <code>B</code> blocks and updates one block per
+iteration. Specify <code>optimizer = &quot;askotch&quot;</code> and pass
+<code>B</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>fit_ask <span class="ot">&lt;-</span> <span class="fu">CreateFullKRR</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="at">x        =</span> x_train,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">y        =</span> y_train,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">kernel   =</span> <span class="st">&quot;rbf&quot;</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">sigma    =</span> <span class="fl">1.0</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="at">lambda   =</span> <span class="fl">0.01</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>  <span class="at">optimizer =</span> <span class="st">&quot;askotch&quot;</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>  <span class="at">iters    =</span> <span class="dv">100</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>  <span class="at">B        =</span> <span class="dv">5</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  <span class="at">verbose  =</span> <span class="cn">FALSE</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>)</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;ASkotch (100 iters, B = 5) - rel_residual:&quot;</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>    <span class="fu">round</span>(fit_ask<span class="sc">$</span>metrics<span class="sc">$</span>rel_residual, <span class="dv">6</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; ASkotch (100 iters, B = 5) - rel_residual: 0.042617</span></span></code></pre></div>
+</div>
+<div id="classification" class="section level2">
+<h2>Classification</h2>
+<p>For binary classification, set <code>task = &quot;classification&quot;</code>
+and supply labels in {-1, +1}. Use <code>predict()</code> to get scores
+and threshold at 0.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>y_cls_train <span class="ot">&lt;-</span> <span class="fu">sign</span>(x_train[, <span class="dv">1</span>])</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>y_cls_test  <span class="ot">&lt;-</span> <span class="fu">sign</span>(x_test[, <span class="dv">1</span>])</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>fit_cls <span class="ot">&lt;-</span> <span class="fu">CreateFullKRR</span>(</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="at">x        =</span> x_train,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="at">y        =</span> y_cls_train,</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>  <span class="at">kernel   =</span> <span class="st">&quot;rbf&quot;</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="at">sigma    =</span> <span class="fl">1.0</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>  <span class="at">lambda   =</span> <span class="fl">0.01</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>  <span class="at">task     =</span> <span class="st">&quot;classification&quot;</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="at">optimizer =</span> <span class="st">&quot;pcg&quot;</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="at">iters    =</span> <span class="dv">30</span>,</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  <span class="at">verbose  =</span> <span class="cn">FALSE</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>)</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>cls_pred <span class="ot">&lt;-</span> <span class="fu">sign</span>(<span class="fu">predict</span>(fit_cls, x_test))</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Classification accuracy:&quot;</span>, <span class="fu">mean</span>(cls_pred <span class="sc">==</span> y_cls_test), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; Classification accuracy: 0.9</span></span></code></pre></div>
+</div>
+<div id="comparing-solvers" class="section level2">
+<h2>Comparing solvers</h2>
+<p>The following example fits the same regression problem with three PCG
+configurations and compares convergence by tracking the relative
+residual at each iteration count.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>configs <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>  <span class="st">&quot;PCG&quot;</span>        <span class="ot">=</span> <span class="fu">list</span>(),</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>  <span class="st">&quot;Newton PCG&quot;</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">preconditioner =</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;newton&quot;</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>                                            <span class="at">rho =</span> <span class="st">&quot;regularization&quot;</span>)),</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  <span class="st">&quot;Nystrom PCG&quot;</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">preconditioner =</span> <span class="fu">list</span>(<span class="at">type =</span> <span class="st">&quot;nystrom&quot;</span>, <span class="at">r =</span> <span class="dv">20</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>                                             <span class="at">rho =</span> <span class="st">&quot;regularization&quot;</span>))</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>n_iters <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, n_iters, <span class="fu">length</span>(configs),</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>                  <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="cn">NULL</span>, <span class="fu">names</span>(configs)))</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="cf">for</span> (cfg_name <span class="cf">in</span> <span class="fu">names</span>(configs)) {</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>  cfg <span class="ot">&lt;-</span> configs[[cfg_name]]</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>  <span class="cf">for</span> (it <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_iters) {</span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>    args <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>      <span class="at">x        =</span> x_train,</span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a>      <span class="at">y        =</span> y_train,</span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a>      <span class="at">kernel   =</span> <span class="st">&quot;rbf&quot;</span>,</span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a>      <span class="at">sigma    =</span> <span class="fl">1.0</span>,</span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a>      <span class="at">lambda   =</span> <span class="fl">0.01</span>,</span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a>      <span class="at">optimizer =</span> <span class="st">&quot;pcg&quot;</span>,</span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a>      <span class="at">iters    =</span> it,</span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a>      <span class="at">verbose  =</span> <span class="cn">FALSE</span></span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a>    )</span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(cfg<span class="sc">$</span>preconditioner)) {</span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a>      args<span class="sc">$</span>preconditioner <span class="ot">&lt;-</span> cfg<span class="sc">$</span>preconditioner</span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a>    }</span>
+<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a>    fit_tmp <span class="ot">&lt;-</span> <span class="fu">do.call</span>(CreateFullKRR, args)</span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a>    results[it, cfg_name] <span class="ot">&lt;-</span> fit_tmp<span class="sc">$</span>metrics<span class="sc">$</span>rel_residual</span>
+<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a>  }</span>
+<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a>}</span>
+<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a></span>
+<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Relative residual by iteration:</span><span class="sc">\n\n</span><span class="st">&quot;</span>)</span>
+<span id="cb10-35"><a href="#cb10-35" tabindex="-1"></a><span class="co">#&gt; Relative residual by iteration:</span></span>
+<span id="cb10-36"><a href="#cb10-36" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;%-5s  %-14s %-14s %-14s</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb10-37"><a href="#cb10-37" tabindex="-1"></a>            <span class="st">&quot;Iter&quot;</span>, <span class="st">&quot;PCG&quot;</span>, <span class="st">&quot;Newton PCG&quot;</span>, <span class="st">&quot;Nystrom PCG&quot;</span>))</span>
+<span id="cb10-38"><a href="#cb10-38" tabindex="-1"></a><span class="co">#&gt; Iter   PCG            Newton PCG     Nystrom PCG</span></span>
+<span id="cb10-39"><a href="#cb10-39" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">8</span>, <span class="dv">10</span>)) {</span>
+<span id="cb10-40"><a href="#cb10-40" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="fu">sprintf</span>(<span class="st">&quot;%-5d  %-14.8f %-14.8f %-14.8f</span><span class="sc">\n</span><span class="st">&quot;</span>,</span>
+<span id="cb10-41"><a href="#cb10-41" tabindex="-1"></a>              i, results[i, <span class="st">&quot;PCG&quot;</span>],</span>
+<span id="cb10-42"><a href="#cb10-42" tabindex="-1"></a>              results[i, <span class="st">&quot;Newton PCG&quot;</span>],</span>
+<span id="cb10-43"><a href="#cb10-43" tabindex="-1"></a>              results[i, <span class="st">&quot;Nystrom PCG&quot;</span>]))</span>
+<span id="cb10-44"><a href="#cb10-44" tabindex="-1"></a>}</span>
+<span id="cb10-45"><a href="#cb10-45" tabindex="-1"></a><span class="co">#&gt; 1      0.49818607     0.00000000     0.58522403    </span></span>
+<span id="cb10-46"><a href="#cb10-46" tabindex="-1"></a><span class="co">#&gt; 2      0.49951486     0.00000000     0.62176037    </span></span>
+<span id="cb10-47"><a href="#cb10-47" tabindex="-1"></a><span class="co">#&gt; 3      0.20767720     0.00000000     0.52569032    </span></span>
+<span id="cb10-48"><a href="#cb10-48" tabindex="-1"></a><span class="co">#&gt; 5      0.12996952     0.00000000     0.47780821    </span></span>
+<span id="cb10-49"><a href="#cb10-49" tabindex="-1"></a><span class="co">#&gt; 8      0.07786489     0.00000000     0.46221669    </span></span>
+<span id="cb10-50"><a href="#cb10-50" tabindex="-1"></a><span class="co">#&gt; 10     0.06039467     0.00000000     0.29798052</span></span></code></pre></div>
+<p>The Newton preconditioner typically converges to
+near-machine-precision in very few iterations for small problems, while
+Nystrom offers a good balance for larger datasets.</p>
+</div>
+<div id="automatic-lambda-selection" class="section level2">
+<h2>Automatic lambda selection</h2>
+<p>When you are unsure what regularization parameter to use, set
+<code>lambda = NULL</code> to let fasterKRR automatically select lambda
+via cross-validation (powered by the <strong>CVST</strong> package).</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>fit_auto <span class="ot">&lt;-</span> <span class="fu">CreateFullKRR</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="at">x        =</span> x_train,</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="at">y        =</span> y_train,</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="at">kernel   =</span> <span class="st">&quot;rbf&quot;</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>  <span class="at">sigma    =</span> <span class="fl">1.0</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="at">lambda   =</span> <span class="cn">NULL</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>  <span class="at">optimizer =</span> <span class="st">&quot;pcg&quot;</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>  <span class="at">iters    =</span> <span class="dv">30</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>  <span class="at">verbose  =</span> <span class="cn">TRUE</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>)</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Auto-selected lambda = 1e-10</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  3/30  rel_residual=0.210123</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  6/30  rel_residual=0.104618</span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  9/30  rel_residual=0.072334</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 12/30  rel_residual=0.046609</span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 15/30  rel_residual=0.020023</span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 18/30  rel_residual=0.008281</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 21/30  rel_residual=0.006023</span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 24/30  rel_residual=0.004430</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 27/30  rel_residual=0.002426</span></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 30/30  rel_residual=0.003023</span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a></span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Selected lambda:&quot;</span>, fit_auto<span class="sc">$</span>lambda, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co">#&gt; Selected lambda: 1e-10</span></span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Relative residual:&quot;</span>, <span class="fu">round</span>(fit_auto<span class="sc">$</span>metrics<span class="sc">$</span>rel_residual, <span class="dv">6</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a><span class="co">#&gt; Relative residual: 0.003023</span></span></code></pre></div>
+<p>By default, <code>lambda = NULL</code> uses <code>CVST::fastCV</code>
+(fast sequential testing) over a grid of 100 linearly spaced values from
+<code>1e-10</code> to <code>1e-3</code>. You can customise the
+process:</p>
+<ul>
+<li><code>fast_cv = FALSE</code> — use standard k-fold CV instead of
+sequential testing</li>
+<li><code>cv_folds = 5L</code> — number of folds for standard CV
+(ignored when <code>fast_cv = TRUE</code>)</li>
+<li><code>lambda_grid</code> — supply your own vector of candidate
+lambda values</li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>fit_custom <span class="ot">&lt;-</span> <span class="fu">CreateFullKRR</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>  <span class="at">x           =</span> x_train,</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>  <span class="at">y           =</span> y_train,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="at">kernel      =</span> <span class="st">&quot;rbf&quot;</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="at">sigma       =</span> <span class="fl">1.0</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>  <span class="at">lambda      =</span> <span class="cn">NULL</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>  <span class="at">optimizer   =</span> <span class="st">&quot;pcg&quot;</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>  <span class="at">iters       =</span> <span class="dv">30</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>  <span class="at">fast_cv     =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>  <span class="at">cv_folds    =</span> <span class="dv">3</span><span class="dt">L</span>,</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>  <span class="at">lambda_grid =</span> <span class="fu">c</span>(<span class="fl">1e-4</span>, <span class="fl">1e-3</span>, <span class="fl">1e-2</span>, <span class="fl">1e-1</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>)</span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Selected lambda:&quot;</span>, fit_custom<span class="sc">$</span>lambda, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt; Selected lambda: 1e-04</span></span></code></pre></div>
+<p>You can also pass the candidate values directly as a vector to
+<code>lambda</code> instead of using both <code>lambda = NULL</code> and
+<code>lambda_grid</code>:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>fit_vec <span class="ot">&lt;-</span> <span class="fu">CreateFullKRR</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="at">x        =</span> x_train,</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>  <span class="at">y        =</span> y_train,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">kernel   =</span> <span class="st">&quot;rbf&quot;</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>  <span class="at">sigma    =</span> <span class="fl">1.0</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  <span class="at">lambda   =</span> <span class="fu">c</span>(<span class="fl">1e-5</span>, <span class="fl">1e-4</span>, <span class="fl">1e-3</span>, <span class="fl">1e-2</span>, <span class="fl">1e-1</span>),</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>  <span class="at">optimizer =</span> <span class="st">&quot;pcg&quot;</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>  <span class="at">iters    =</span> <span class="dv">30</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  <span class="at">verbose  =</span> <span class="cn">TRUE</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>)</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Auto-selected lambda = 1e-05</span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  3/30  rel_residual=0.210121</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  6/30  rel_residual=0.104614</span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter  9/30  rel_residual=0.072325</span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 12/30  rel_residual=0.046599</span></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 15/30  rel_residual=0.020016</span></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 18/30  rel_residual=0.008391</span></span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 21/30  rel_residual=0.006019</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 24/30  rel_residual=0.004427</span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 27/30  rel_residual=0.002424</span></span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a><span class="co">#&gt; [fasterKRR] Iter 30/30  rel_residual=0.002465</span></span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a></span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Selected lambda:&quot;</span>, fit_vec<span class="sc">$</span>lambda, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a><span class="co">#&gt; Selected lambda: 1e-05</span></span></code></pre></div>
+<p>When <code>lambda</code> is a vector of length greater than one,
+cross-validation is run over those values automatically. This is
+equivalent to setting <code>lambda = NULL</code> with
+<code>lambda_grid = c(...)</code>, but more concise.</p>
+<p>Auto-selection also works with <code>CreateInducingKRR()</code>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>fit_ind_auto <span class="ot">&lt;-</span> <span class="fu">CreateInducingKRR</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="at">x            =</span> x_train,</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="at">y            =</span> y_train,</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="at">inducing_pts =</span> <span class="dv">1</span><span class="sc">:</span>m_ind,</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>  <span class="at">kernel       =</span> <span class="st">&quot;rbf&quot;</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>  <span class="at">sigma        =</span> <span class="fl">1.0</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>  <span class="at">lambda       =</span> <span class="cn">NULL</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>  <span class="at">optimizer    =</span> <span class="st">&quot;pcg&quot;</span>,</span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>  <span class="at">iters        =</span> <span class="dv">30</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>)</span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Inducing KRR selected lambda:&quot;</span>, fit_ind_auto<span class="sc">$</span>lambda, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="co">#&gt; Inducing KRR selected lambda: 0.0008383839</span></span></code></pre></div>
+</div>
+<div id="online-learning-with-updatemodel" class="section level2">
+<h2>Online learning with UpdateModel</h2>
+<p>For streaming or online settings, you can incorporate new
+observations one at a time into an <code>InducingKRR</code> model
+without refitting from scratch. <code>UpdateModel()</code> returns a
+<strong>new</strong> model with the observation incorporated – the
+original is never modified. This uses a rank-1 Sherman-Morrison update
+on the system matrix inverse, costing only O(m^2) per new point (where m
+is the number of inducing points).</p>
+<p>Because the original model is preserved, you can keep snapshots or
+branch off from any point in the stream:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>model2 <span class="ot">&lt;-</span> <span class="fu">UpdateModel</span>(model, x_new, y_new)   <span class="co"># model is unchanged</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>model  <span class="ot">&lt;-</span> <span class="fu">UpdateModel</span>(model, x_new, y_new)   <span class="co"># overwrite to advance</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Fit an initial model on the first 80 points</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>fit_initial <span class="ot">&lt;-</span> <span class="fu">CreateInducingKRR</span>(</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>  <span class="at">x            =</span> x_train[<span class="dv">1</span><span class="sc">:</span><span class="dv">80</span>, ],</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>  <span class="at">y            =</span> y_train[<span class="dv">1</span><span class="sc">:</span><span class="dv">80</span>],</span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>  <span class="at">inducing_pts =</span> <span class="dv">1</span><span class="sc">:</span>m_ind,</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>  <span class="at">kernel       =</span> <span class="st">&quot;rbf&quot;</span>,</span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>  <span class="at">sigma        =</span> <span class="fl">1.0</span>,</span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>  <span class="at">lambda       =</span> <span class="fl">0.01</span>,</span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>  <span class="at">optimizer    =</span> <span class="st">&quot;pcg&quot;</span>,</span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>  <span class="at">iters        =</span> <span class="dv">30</span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>)</span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a></span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Before streaming: n =&quot;</span>, fit_initial<span class="sc">$</span>n, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; Before streaming: n = 80</span></span></code></pre></div>
+<p>Now stream the remaining 20 points one at a time. Each call to
+<code>UpdateModel()</code> returns a new model; we overwrite
+<code>fit_streamed</code> to advance the stream, while
+<code>fit_initial</code> stays unchanged:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>fit_streamed <span class="ot">&lt;-</span> fit_initial</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">81</span><span class="sc">:</span><span class="dv">100</span>) {</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  fit_streamed <span class="ot">&lt;-</span> <span class="fu">UpdateModel</span>(fit_streamed, x_train[i, ], y_train[i],</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>                               <span class="at">recompute_metrics =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>}</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;After streaming:  n =&quot;</span>, fit_streamed<span class="sc">$</span>n, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="co">#&gt; After streaming:  n = 100</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Rank-1 updates:  &quot;</span>, fit_streamed<span class="sc">$</span>n_updates, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="co">#&gt; Rank-1 updates:   20</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Original still:   n =&quot;</span>, fit_initial<span class="sc">$</span>n, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a><span class="co">#&gt; Original still:   n = 80</span></span></code></pre></div>
+<p>Compare predictions from the original and streamed models:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>y_pred_before <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_initial, x_test)</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>y_pred_after  <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_streamed, x_test)</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;RMSE before streaming:&quot;</span>, <span class="fu">round</span>(<span class="fu">sqrt</span>(<span class="fu">mean</span>((y_pred_before <span class="sc">-</span> y_test)<span class="sc">^</span><span class="dv">2</span>)), <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="co">#&gt; RMSE before streaming: 0.4705</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;RMSE after streaming: &quot;</span>, <span class="fu">round</span>(<span class="fu">sqrt</span>(<span class="fu">mean</span>((y_pred_after  <span class="sc">-</span> y_test)<span class="sc">^</span><span class="dv">2</span>)), <span class="dv">4</span>), <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co">#&gt; RMSE after streaming:  0.4754</span></span></code></pre></div>
+<p>For long-running streams, periodically call
+<code>UpdateModel(..., recompute = TRUE)</code> to refresh the inverse
+matrix and maintain numerical stability.</p>
+</div>
+<div id="available-options" class="section level2">
+<h2>Available options</h2>
+<div id="optimizers" class="section level3">
+<h3>Optimizers</h3>
+<table>
+<colgroup>
+<col width="22%" />
+<col width="20%" />
+<col width="30%" />
+<col width="26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Optimizer</th>
+<th>Argument</th>
+<th>Key parameters</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PCG</td>
+<td><code>optimizer = &quot;pcg&quot;</code></td>
+<td><code>preconditioner</code> (optional)</td>
+<td>Preconditioned Conjugate Gradient. Default solver.</td>
+</tr>
+<tr class="even">
+<td>EigenPro2</td>
+<td><code>optimizer = &quot;eigenpro2&quot;</code></td>
+<td><code>block_sz</code>, <code>r</code></td>
+<td>Preconditioned SGD with top-<code>r</code> eigenvector
+correction.</td>
+</tr>
+<tr class="odd">
+<td>ASkotch</td>
+<td><code>optimizer = &quot;askotch&quot;</code></td>
+<td><code>B</code></td>
+<td>Accelerated block coordinate descent with <code>B</code>
+blocks.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="preconditioners-for-pcg" class="section level3">
+<h3>Preconditioners (for PCG)</h3>
+<table>
+<colgroup>
+<col width="27%" />
+<col width="24%" />
+<col width="25%" />
+<col width="22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Preconditioner</th>
+<th>Specification</th>
+<th>Key parameters</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Newton</td>
+<td><code>list(type = &quot;newton&quot;, rho = &quot;regularization&quot;)</code></td>
+<td>–</td>
+<td>Exact factorization; fast convergence, O(n^3) cost.</td>
+</tr>
+<tr class="even">
+<td>Nystrom</td>
+<td><code>list(type = &quot;nystrom&quot;, r = ..., rho = &quot;regularization&quot;)</code></td>
+<td><code>r</code> (rank)</td>
+<td>Low-rank approximation; good for medium-to-large n.</td>
+</tr>
+<tr class="odd">
+<td>Partial Cholesky</td>
+<td><code>list(type = &quot;partial_cholesky&quot;, r = ..., rho = &quot;regularization&quot;, mode = &quot;greedy&quot;)</code></td>
+<td><code>r</code>, <code>mode</code></td>
+<td>Greedy or random pivoted Cholesky; scalable.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="kernel-types" class="section level3">
+<h3>Kernel types</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Kernel</th>
+<th>Argument</th>
+<th>Key parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>RBF (Gaussian)</td>
+<td><code>kernel = &quot;rbf&quot;</code></td>
+<td><code>sigma</code></td>
+</tr>
+<tr class="even">
+<td>Matern</td>
+<td><code>kernel = &quot;matern&quot;</code></td>
+<td><code>sigma</code>, <code>nu</code></td>
+</tr>
+<tr class="odd">
+<td>L1 Laplace</td>
+<td><code>kernel = &quot;l1_laplace&quot;</code></td>
+<td><code>sigma</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="tasks" class="section level3">
+<h3>Tasks</h3>
+<table>
+<colgroup>
+<col width="18%" />
+<col width="30%" />
+<col width="51%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Task</th>
+<th>Argument</th>
+<th>Training metrics</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Regression</td>
+<td><code>task = &quot;regression&quot;</code> (default)</td>
+<td><code>rel_residual</code>, <code>train_loss</code></td>
+</tr>
+<tr class="even">
+<td>Classification</td>
+<td><code>task = &quot;classification&quot;</code></td>
+<td><code>rel_residual</code>, <code>train_loss</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
