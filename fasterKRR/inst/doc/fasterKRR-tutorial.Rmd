@@ -1,0 +1,493 @@
+---
+title: "Getting Started with fasterKRR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with fasterKRR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+**fasterKRR** provides fast solvers for kernel ridge regression (KRR).
+It is an R translation of the
+[fast_krr](https://github.com/pratikrathore8/fast_krr) Python package.
+
+The package exports two main functions and their predict methods:
+
+- `CreateFullKRR()` -- fit a full kernel ridge regression model
+- `CreateInducingKRR()` -- fit an inducing-point (Nystrom-approximate) KRR model
+- `predict()` -- generate predictions from a fitted model
+
+All kernel computation, optimizer construction, iteration stepping, and
+metric evaluation happen internally. You specify the kernel type, optimizer,
+and any additional options as arguments to `CreateFullKRR()` or
+`CreateInducingKRR()`, and receive a fitted model object ready for
+prediction.
+
+Key features:
+
+- **Kernel types**: RBF, Matern, L1 Laplace
+- **Optimizers**: PCG, EigenPro2, ASkotch
+- **Preconditioners** (for PCG): Newton, Nystrom, Partial Cholesky
+- **Tasks**: regression and classification
+
+## Regression with PCG
+
+The simplest workflow creates a model with the PCG solver, then uses
+`predict()` to generate predictions.
+
+```{r pcg-regression}
+library(fasterKRR)
+
+set.seed(123)
+n <- 100
+d <- 5
+
+# Generate synthetic data: y = sin(x1) + noise
+x_train <- matrix(rnorm(n * d), n, d)
+y_train <- sin(x_train[, 1]) + 0.1 * rnorm(n)
+
+x_test <- matrix(rnorm(30 * d), 30, d)
+y_test <- sin(x_test[, 1]) + 0.1 * rnorm(30)
+
+# Fit with unpreconditioned PCG (30 iterations)
+fit <- CreateFullKRR(
+  x        = x_train,
+  y        = y_train,
+  kernel   = "rbf",
+  sigma    = 1.0,
+  lambda   = 0.01,
+  optimizer = "pcg",
+  iters    = 30,
+  verbose  = TRUE
+)
+
+# Inspect convergence metrics stored on the fitted object
+cat("Relative residual:", round(fit$metrics$rel_residual, 6), "\n")
+```
+
+The `verbose = TRUE` argument prints progress at each iteration.  Metrics
+such as `rel_residual` and `train_loss` are available in the
+`fit$metrics` list after fitting. Use `predict()` to evaluate
+held-out performance.
+
+## Making predictions
+
+Use the standard R `predict()` generic on any fitted model.
+
+### Predicting on the test set
+
+```{r predict-test}
+y_pred <- predict(fit, x_test)
+
+cat("First 5 predictions:", round(y_pred[1:5], 4), "\n")
+cat("First 5 actual:     ", round(y_test[1:5], 4), "\n")
+cat("Correlation:        ", round(cor(y_pred, y_test), 4), "\n")
+cat("Test RMSE:          ", round(sqrt(mean((y_pred - y_test)^2)), 4), "\n")
+```
+
+### Predicting on completely new data
+
+`predict()` works on any matrix with the same number of columns as the
+training data -- the kernel between new points and the training set is
+computed internally.
+
+```{r predict-new}
+x_new <- matrix(rnorm(10 * d), 10, d)
+y_new <- predict(fit, x_new)
+cat("Predictions for 10 new points:", round(y_new, 4), "\n")
+```
+
+### Predictions with inducing-point models
+
+`CreateInducingKRR()` fits a model using only a subset of the training
+points (the "inducing points"). The `predict()` method computes the
+kernel between new points and the inducing set, so usage is identical.
+
+```{r predict-inducing}
+m_ind <- 15
+
+fit_ind <- CreateInducingKRR(
+  x            = x_train,
+  y            = y_train,
+  inducing_pts = 1:m_ind,
+  kernel       = "rbf",
+  sigma        = 1.0,
+  lambda       = 0.01,
+  optimizer    = "pcg",
+  iters        = 30
+)
+
+y_pred_ind <- predict(fit_ind, x_test)
+cat("Inducing KRR predictions (first 5):", round(y_pred_ind[1:5], 4), "\n")
+cat("Correlation with truth:            ", round(cor(y_pred_ind, y_test), 4), "\n")
+```
+
+## Adding preconditioners
+
+Preconditioners dramatically accelerate PCG convergence. Pass a
+`preconditioner` list to `CreateFullKRR()` when `optimizer = "pcg"`.
+
+### Newton preconditioner
+
+The Newton preconditioner factorizes the full regularized kernel matrix.
+It is exact for small problems and converges in very few iterations.
+
+```{r precond-newton}
+fit_newton <- CreateFullKRR(
+  x        = x_train,
+  y        = y_train,
+  kernel   = "rbf",
+  sigma    = 1.0,
+  lambda   = 0.01,
+  optimizer = "pcg",
+  preconditioner = list(type = "newton", rho = "regularization"),
+  iters    = 5,
+  verbose  = TRUE
+)
+
+cat("\nNewton PCG (5 iters) - rel_residual:",
+    round(fit_newton$metrics$rel_residual, 8), "\n")
+```
+
+### Nystrom preconditioner
+
+The Nystrom preconditioner uses a low-rank approximation to the kernel
+matrix. It scales better than Newton to larger datasets while still
+providing significant speedup.
+
+```{r precond-nystrom}
+fit_nystrom <- CreateFullKRR(
+  x        = x_train,
+  y        = y_train,
+  kernel   = "rbf",
+  sigma    = 1.0,
+  lambda   = 0.01,
+  optimizer = "pcg",
+  preconditioner = list(type = "nystrom", r = 20, rho = "regularization"),
+  iters    = 10,
+  verbose  = TRUE
+)
+
+cat("\nNystrom PCG (10 iters) - rel_residual:",
+    round(fit_nystrom$metrics$rel_residual, 6), "\n")
+```
+
+## EigenPro2 optimizer
+
+EigenPro2 is a preconditioned stochastic gradient descent method.
+It processes data in mini-batches (`block_sz`) and uses the top `r`
+eigenvectors of the kernel sub-matrix for preconditioning. It is
+well-suited for problems where many iterations of a stochastic
+method are preferred over the exact linear algebra of PCG.
+Specify `optimizer = "eigenpro2"` and pass `block_sz` and `r`.
+
+```{r eigenpro2}
+fit_ep2 <- CreateFullKRR(
+  x        = x_train,
+  y        = y_train,
+  kernel   = "rbf",
+  sigma    = 1.0,
+  lambda   = 0.01,
+  optimizer = "eigenpro2",
+  iters    = 200,
+  block_sz = 80,
+  r        = 10,
+  verbose  = FALSE
+)
+
+cat("EigenPro2 (200 iters) - rel_residual:",
+    round(fit_ep2$metrics$rel_residual, 6), "\n")
+```
+
+## ASkotch optimizer
+
+ASkotch is an accelerated block coordinate descent method. It
+partitions the data into `B` blocks and updates one block per
+iteration. Specify `optimizer = "askotch"` and pass `B`.
+
+```{r askotch}
+fit_ask <- CreateFullKRR(
+  x        = x_train,
+  y        = y_train,
+  kernel   = "rbf",
+  sigma    = 1.0,
+  lambda   = 0.01,
+  optimizer = "askotch",
+  iters    = 100,
+  B        = 5,
+  verbose  = FALSE
+)
+
+cat("ASkotch (100 iters, B = 5) - rel_residual:",
+    round(fit_ask$metrics$rel_residual, 6), "\n")
+```
+
+## Classification
+
+For binary classification, set `task = "classification"` and supply
+labels in {-1, +1}. Use `predict()` to get scores and threshold at 0.
+
+```{r classification}
+y_cls_train <- sign(x_train[, 1])
+y_cls_test  <- sign(x_test[, 1])
+
+fit_cls <- CreateFullKRR(
+  x        = x_train,
+  y        = y_cls_train,
+  kernel   = "rbf",
+  sigma    = 1.0,
+  lambda   = 0.01,
+  task     = "classification",
+  optimizer = "pcg",
+  iters    = 30,
+  verbose  = FALSE
+)
+
+cls_pred <- sign(predict(fit_cls, x_test))
+cat("Classification accuracy:", mean(cls_pred == y_cls_test), "\n")
+```
+
+## Comparing solvers
+
+The following example fits the same regression problem with three
+PCG configurations and compares convergence by tracking the relative
+residual at each iteration count.
+
+```{r comparison}
+configs <- list(
+  "PCG"        = list(),
+  "Newton PCG" = list(preconditioner = list(type = "newton",
+                                            rho = "regularization")),
+  "Nystrom PCG" = list(preconditioner = list(type = "nystrom", r = 20,
+                                             rho = "regularization"))
+)
+
+n_iters <- 10
+results <- matrix(NA, n_iters, length(configs),
+                  dimnames = list(NULL, names(configs)))
+
+for (cfg_name in names(configs)) {
+  cfg <- configs[[cfg_name]]
+  for (it in 1:n_iters) {
+    args <- list(
+      x        = x_train,
+      y        = y_train,
+      kernel   = "rbf",
+      sigma    = 1.0,
+      lambda   = 0.01,
+      optimizer = "pcg",
+      iters    = it,
+      verbose  = FALSE
+    )
+    if (!is.null(cfg$preconditioner)) {
+      args$preconditioner <- cfg$preconditioner
+    }
+    fit_tmp <- do.call(CreateFullKRR, args)
+    results[it, cfg_name] <- fit_tmp$metrics$rel_residual
+  }
+}
+
+cat("Relative residual by iteration:\n\n")
+cat(sprintf("%-5s  %-14s %-14s %-14s\n",
+            "Iter", "PCG", "Newton PCG", "Nystrom PCG"))
+for (i in c(1, 2, 3, 5, 8, 10)) {
+  cat(sprintf("%-5d  %-14.8f %-14.8f %-14.8f\n",
+              i, results[i, "PCG"],
+              results[i, "Newton PCG"],
+              results[i, "Nystrom PCG"]))
+}
+```
+
+The Newton preconditioner typically converges to near-machine-precision
+in very few iterations for small problems, while Nystrom offers a good
+balance for larger datasets.
+
+## Automatic lambda selection
+
+When you are unsure what regularization parameter to use, set
+`lambda = NULL` to let fasterKRR automatically select lambda via
+cross-validation (powered by the **CVST** package).
+
+```{r auto-lambda}
+fit_auto <- CreateFullKRR(
+  x        = x_train,
+  y        = y_train,
+  kernel   = "rbf",
+  sigma    = 1.0,
+  lambda   = NULL,
+  optimizer = "pcg",
+  iters    = 30,
+  verbose  = TRUE
+)
+
+cat("Selected lambda:", fit_auto$lambda, "\n")
+cat("Relative residual:", round(fit_auto$metrics$rel_residual, 6), "\n")
+```
+
+By default, `lambda = NULL` uses `CVST::fastCV` (fast sequential
+testing) over a grid of 100 linearly spaced values from `1e-10` to `1e-3`.
+You can customise the process:
+
+- `fast_cv = FALSE` — use standard k-fold CV instead of sequential testing
+- `cv_folds = 5L` — number of folds for standard CV (ignored when `fast_cv = TRUE`)
+- `lambda_grid` — supply your own vector of candidate lambda values
+
+```{r auto-lambda-custom}
+fit_custom <- CreateFullKRR(
+  x           = x_train,
+  y           = y_train,
+  kernel      = "rbf",
+  sigma       = 1.0,
+  lambda      = NULL,
+  optimizer   = "pcg",
+  iters       = 30,
+  fast_cv     = FALSE,
+  cv_folds    = 3L,
+  lambda_grid = c(1e-4, 1e-3, 1e-2, 1e-1)
+)
+
+cat("Selected lambda:", fit_custom$lambda, "\n")
+```
+
+You can also pass the candidate values directly as a vector to `lambda`
+instead of using both `lambda = NULL` and `lambda_grid`:
+
+```{r auto-lambda-vector}
+fit_vec <- CreateFullKRR(
+  x        = x_train,
+  y        = y_train,
+  kernel   = "rbf",
+  sigma    = 1.0,
+  lambda   = c(1e-5, 1e-4, 1e-3, 1e-2, 1e-1),
+  optimizer = "pcg",
+  iters    = 30,
+  verbose  = TRUE
+)
+
+cat("Selected lambda:", fit_vec$lambda, "\n")
+```
+
+When `lambda` is a vector of length greater than one, cross-validation is
+run over those values automatically. This is equivalent to setting
+`lambda = NULL` with `lambda_grid = c(...)`, but more concise.
+
+Auto-selection also works with `CreateInducingKRR()`:
+
+```{r auto-lambda-inducing}
+fit_ind_auto <- CreateInducingKRR(
+  x            = x_train,
+  y            = y_train,
+  inducing_pts = 1:m_ind,
+  kernel       = "rbf",
+  sigma        = 1.0,
+  lambda       = NULL,
+  optimizer    = "pcg",
+  iters        = 30
+)
+
+cat("Inducing KRR selected lambda:", fit_ind_auto$lambda, "\n")
+```
+
+## Online learning with UpdateModel
+
+For streaming or online settings, you can incorporate new observations
+one at a time into an `InducingKRR` model without refitting from scratch.
+`UpdateModel()` returns a **new** model with the observation incorporated
+-- the original is never modified.  This uses a rank-1 Sherman-Morrison
+update on the system matrix inverse, costing only O(m^2) per new point
+(where m is the number of inducing points).
+
+Because the original model is preserved, you can keep snapshots or
+branch off from any point in the stream:
+
+```r
+model2 <- UpdateModel(model, x_new, y_new)   # model is unchanged
+model  <- UpdateModel(model, x_new, y_new)   # overwrite to advance
+```
+
+```{r online-fit}
+# Fit an initial model on the first 80 points
+fit_initial <- CreateInducingKRR(
+  x            = x_train[1:80, ],
+  y            = y_train[1:80],
+  inducing_pts = 1:m_ind,
+  kernel       = "rbf",
+  sigma        = 1.0,
+  lambda       = 0.01,
+  optimizer    = "pcg",
+  iters        = 30
+)
+
+cat("Before streaming: n =", fit_initial$n, "\n")
+```
+
+Now stream the remaining 20 points one at a time.  Each call to
+`UpdateModel()` returns a new model; we overwrite `fit_streamed` to
+advance the stream, while `fit_initial` stays unchanged:
+
+```{r online-stream}
+fit_streamed <- fit_initial
+for (i in 81:100) {
+  fit_streamed <- UpdateModel(fit_streamed, x_train[i, ], y_train[i],
+                               recompute_metrics = FALSE)
+}
+
+cat("After streaming:  n =", fit_streamed$n, "\n")
+cat("Rank-1 updates:  ", fit_streamed$n_updates, "\n")
+cat("Original still:   n =", fit_initial$n, "\n")
+```
+
+Compare predictions from the original and streamed models:
+
+```{r online-compare}
+y_pred_before <- predict(fit_initial, x_test)
+y_pred_after  <- predict(fit_streamed, x_test)
+
+cat("RMSE before streaming:", round(sqrt(mean((y_pred_before - y_test)^2)), 4), "\n")
+cat("RMSE after streaming: ", round(sqrt(mean((y_pred_after  - y_test)^2)), 4), "\n")
+```
+
+For long-running streams, periodically call `UpdateModel(..., recompute = TRUE)`
+to refresh the inverse matrix and maintain numerical stability.
+
+## Available options
+
+### Optimizers
+
+| Optimizer | Argument | Key parameters | Description |
+|-----------|----------|---------------|-------------|
+| PCG | `optimizer = "pcg"` | `preconditioner` (optional) | Preconditioned Conjugate Gradient. Default solver. |
+| EigenPro2 | `optimizer = "eigenpro2"` | `block_sz`, `r` | Preconditioned SGD with top-`r` eigenvector correction. |
+| ASkotch | `optimizer = "askotch"` | `B` | Accelerated block coordinate descent with `B` blocks. |
+
+### Preconditioners (for PCG)
+
+| Preconditioner | Specification | Key parameters | Description |
+|----------------|--------------|---------------|-------------|
+| Newton | `list(type = "newton", rho = "regularization")` | -- | Exact factorization; fast convergence, O(n^3) cost. |
+| Nystrom | `list(type = "nystrom", r = ..., rho = "regularization")` | `r` (rank) | Low-rank approximation; good for medium-to-large n. |
+| Partial Cholesky | `list(type = "partial_cholesky", r = ..., rho = "regularization", mode = "greedy")` | `r`, `mode` | Greedy or random pivoted Cholesky; scalable. |
+
+### Kernel types
+
+| Kernel | Argument | Key parameters |
+|--------|----------|---------------|
+| RBF (Gaussian) | `kernel = "rbf"` | `sigma` |
+| Matern | `kernel = "matern"` | `sigma`, `nu` |
+| L1 Laplace | `kernel = "l1_laplace"` | `sigma` |
+
+### Tasks
+
+| Task | Argument | Training metrics |
+|------|----------|-----------------|
+| Regression | `task = "regression"` (default) | `rel_residual`, `train_loss` |
+| Classification | `task = "classification"` | `rel_residual`, `train_loss` |

@@ -1,0 +1,23 @@
+Package: fasterKRR
+Title: Fast Kernel Ridge Regression
+Version: 0.5.1
+Authors@R: 
+    person("Clade Code Opus 4.6", "User", email = "devnull@example.com", role = c("aut", "cre"))
+Description: R translation of fast_krr Python package by Pratik Rathore.
+    Provides fast kernel ridge regression through a simplified two-function
+    API: CreateFullKRR() for exact models and CreateInducingKRR() for
+    scalable inducing-point approximations. Supports multiple optimizers
+    (PCG, EigenPro, ASkotch, Mimosa) and preconditioners (Newton, Nystrom,
+    Falkon, partial Cholesky) selected via simple string arguments.
+Imports: CVST
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Suggests: RSpectra, testthat (>= 3.0.0), knitr, rmarkdown
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+NeedsCompilation: no
+Packaged: 2026-02-15 00:05:17 UTC; scott
+Author: Clade Code Opus 4.6 User [aut, cre]
+Maintainer: Clade Code Opus 4.6 User <devnull@example.com>
